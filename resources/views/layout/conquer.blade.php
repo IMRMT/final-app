@@ -263,12 +263,12 @@ License: You must have a valid license purchased only from themeforest(the above
                                 <span class="title">Satuan produk</span>
                             </a>
                         </li>
-                        <li>
+                        {{-- <li>
                             <a href="{{ route('forecast') }}">
                                 <i class="icon-bar-chart"></i>
                                 <span class="title">Visual Forecasting Charts</span>
                             </a>
-                        </li>
+                        </li> --}}
                     @else
                         <li>
                             <a href="{{ route('welcome') }}">
