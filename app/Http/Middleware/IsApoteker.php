@@ -20,7 +20,7 @@ class IsApoteker
         if (Auth::check() && Auth::user()->tipe_user === 'apoteker') {
             return $next($request);
         }
-// 
+
         abort(403, 'Unauthorized');
     }
 }
