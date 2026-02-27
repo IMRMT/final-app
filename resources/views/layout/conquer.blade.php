@@ -19,7 +19,7 @@ License: You must have a valid license purchased only from themeforest(the above
 
 <head>
     <meta charset="utf-8" />
-    <title>Purigama</title>
+    <title>Apotek App</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="" name="description" />
@@ -66,13 +66,13 @@ License: You must have a valid license purchased only from themeforest(the above
                 @if (auth()->user())
                     <a href="{{ route('homeProduk') }}">
                         <div class="flex items-center space-x-4 mb-3 pb-2">
-                            <h1 class="text-3xl font-bold text-white mt-4">Purigama</h1>
+                            <h1 class="text-3xl font-bold text-white mt-4">Apotek App</h1>
                         </div>
                     </a>
                 @else
                     <a href="{{ route('welcome') }}">
                         <div class="flex items-center space-x-4 mb-3 pb-2">
-                            <h1 class="text-3xl font-bold text-white mt-4">Purigama</h1>
+                            <h1 class="text-3xl font-bold text-white mt-4">Apotek App</h1>
                         </div>
                     </a>
                 @endif
@@ -153,7 +153,7 @@ License: You must have a valid license purchased only from themeforest(the above
                         </div>
                         <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
                     </li>
-                    @if (auth()->user())
+                    @if (auth()->user()->tipe_user === 'apoteker')
                         <li>
                             <a href="{{ route('homeProduk') }}">
                                 <i class="icon-home"></i>
@@ -269,6 +269,21 @@ License: You must have a valid license purchased only from themeforest(the above
                                 <span class="title">Visual Forecasting Charts</span>
                             </a>
                         </li> --}}
+                    @elseif (auth()->user()->tipe_user === 'kasir')
+                        <li>
+                            <a href="javascript:;">
+                                <i class="icon-book-open"></i>
+                                <span class="title">Transaksi</span>
+                                <span class="arrow "></span>
+                            </a>
+                            <ul class="sub-menu">
+                                <li>
+                                    <a href="{{ url('notajuals/create') }}">
+                                        <i class="icon-basket-loaded"></i>
+                                        Jual Produk</a>
+                                </li>
+                            </ul>
+                        </li>
                     @else
                         <li>
                             <a href="{{ route('welcome') }}">

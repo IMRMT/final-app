@@ -14,6 +14,7 @@ use App\Http\Controllers\RacikanController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\IsApoteker;
 use Illuminate\Support\Facades\Session;
 
 // Route::get('/', function () {
@@ -54,9 +55,8 @@ Route::middleware(['auth', IsAdmin::class])->group(function () {
     Route::get('/user', [UserController::class, 'index'])->name('user');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', IsApoteker::class])->group(function () {
     Route::resource('distributors', DistributorController::class);
-    Route::resource('notajuals', NotajualController::class);
     Route::resource('notabelis', NotabeliController::class);
     Route::resource('satuans', SatuanController::class);
     Route::resource('produks', ProdukController::class);
@@ -72,12 +72,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/forecasts', [ForecastController::class, 'index'])->name('forecast');
     Route::post('/forecast/sales_post', [ForecastController::class, 'sales_post'])->name('forecasts.sales_post');
     Route::get('/forecast/forecasted/{id}', [ForecastController::class, 'forecast'])->name('forecasts.forecast');
-    Route::get('racikan/komposisi/{id}', [RacikanController::class, 'komposisi'])->name('racikans.komposisi');
-    Route::get('racikan/notaracikan', [RacikanController::class, 'notaRacikan'])->name('racikans.notaRacikan');
-    Route::post('racikan/jualracikan/{id}', [RacikanController::class, 'jualRacikan'])->name('racikans.jualRacikan');
-    Route::delete('racikan/destroyKomposisi/{racikans_id}/{produks_id}', [RacikanController::class, 'destroyKomposisi'])->name('racikans.destroyKomposisi');
-    Route::get('racikan/uploadImage/{id}', [RacikanController::class, 'uploadImage']);
-    Route::post('racikan/simpanImage', [RacikanController::class, 'simpanImage']);
     Route::get('produk/terimaBatch/{id}', [ProdukController::class, 'terimaBatch'])->name('produks.terimaBatch');
     Route::put('produk/updateTerimaBatch/{id}', [ProdukController::class, 'updateTerimaBatch'])->name('produks.updateTerimaBatch');
     Route::get('produk/editBatch/{id}', [ProdukController::class, 'editBatch'])->name('produks.editBatch');
@@ -93,9 +87,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', [ProdukController::class, 'homeProduk'])->name('homeProduk');
     Route::get('produk/batch/{id}', [ProdukController::class, 'batch'])->name('produks.batch');
     Route::get('produk/batch/{id}/print', [ProdukController::class, 'print'])->name('produks.print');
-    Route::post('/notajuals/cart', [NotajualController::class, 'addToCart'])->name('notajuals.cart');
-    Route::delete('/notajuals/cart/delete/{id}', [NotajualController::class, 'deleteFromCart'])->name('notajualscart.delete');
-    Route::get('/notajuals/{id}/print', [NotajualController::class, 'print'])->name('notajuals.print');
     Route::post('/notabelis/cart', [NotabeliController::class, 'addToCart'])->name('notabelis.cart');
     Route::delete('/notabelis/cart/delete/{id}', [NotabeliController::class, 'deleteFromCart'])->name('notabeliscart.delete');
     Route::post('/notabelis/beliProdukBaru', [NotabeliController::class, 'beliProdukBaru'])->name('notabelis.beliProdukBaru');
@@ -109,6 +100,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/transaksi', function () {
         return view('transaksi.tipe');
     })->name('transaksi');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('notajuals', NotajualController::class);
+    Route::get('racikan/komposisi/{id}', [RacikanController::class, 'komposisi'])->name('racikans.komposisi');
+    Route::get('racikan/notaracikan', [RacikanController::class, 'notaRacikan'])->name('racikans.notaRacikan');
+    Route::post('racikan/jualracikan/{id}', [RacikanController::class, 'jualRacikan'])->name('racikans.jualRacikan');
+    Route::delete('racikan/destroyKomposisi/{racikans_id}/{produks_id}', [RacikanController::class, 'destroyKomposisi'])->name('racikans.destroyKomposisi');
+    Route::get('racikan/uploadImage/{id}', [RacikanController::class, 'uploadImage']);
+    Route::post('racikan/simpanImage', [RacikanController::class, 'simpanImage']);
+    Route::post('/notajuals/cart', [NotajualController::class, 'addToCart'])->name('notajuals.cart');
+    Route::delete('/notajuals/cart/delete/{id}', [NotajualController::class, 'deleteFromCart'])->name('notajualscart.delete');
+    Route::get('/notajuals/{id}/print', [NotajualController::class, 'print'])->name('notajuals.print');
 });
 
 
