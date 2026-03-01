@@ -346,7 +346,15 @@ class NotajualController extends Controller
                 'produks.image',
                 'satuans.nama as satuan_nama',
                 DB::raw('SUM(produkbatches.stok) as stok'),
-                DB::raw('MIN(produks.sellingprice) as sellingprice'),
+                DB::raw('
+                    CASE 
+                        WHEN SUM(produkbatches.stok) > 0 
+                        THEN 
+                            (SUM(produkbatches.unitprice * produkbatches.stok) / SUM(produkbatches.stok))
+                            * (1 + (produks.sellingprice/100))
+                        ELSE 0
+                    END as sellingprice'),
+                // DB::raw('MIN(produks.sellingprice) as sellingprice'),
                 DB::raw('MIN(produkbatches.tgl_kadaluarsa) as tgl_kadaluarsa'),
                 DB::raw('MIN(produkbatches.distributors_id) as distributors_id')
             )
@@ -470,8 +478,6 @@ class NotajualController extends Controller
             $quantities = $request->input('quantity');
             $isRacikanFlags = $request->input('is_racikan', []);
 
-            // dd($isRacikanFlags, $ids, $quantities);
-
             foreach ($ids as $i => $produkId) {
                 $jumlah = $quantities[$i];
                 $isRacikan = $isRacikanFlags[$i] == '1';
@@ -479,12 +485,26 @@ class NotajualController extends Controller
                 if ($isRacikan) {
                     // ==== RACIKAN ====
                     $racikan = Racikan::with('produks')->findOrFail($produkId);
-                    // dd($racikan->toArray());
                     $totalHarga = 0;
 
                     foreach ($racikan->produks as $produk) {
                         $totalQty = $produk->pivot->quantity * $jumlah;
                         $sisa = $totalQty;
+
+                        // 🔥 CALCULATE WAC ONCE
+                        $wac = Produkbatches::where('produks_id', $produk->id)
+                            ->where('stok', '>', 0)
+                            ->where('status', 'tersedia')
+                            ->whereDate('tgl_kadaluarsa', '>', now())
+                            ->selectRaw('SUM(unitprice * stok) / SUM(stok) as wac')
+                            ->value('wac');
+
+                        if (!$wac) {
+                            throw new \Exception("Stok tidak tersedia untuk produk ID: {$produk->id}");
+                        }
+
+                        $margin = $produk->sellingprice; // margin %
+                        $finalPrice = $wac * (1 + ($margin / 100));
 
                         $batches = Produkbatches::where('produks_id', $produk->id)
                             ->where('stok', '>', 0)
@@ -503,12 +523,13 @@ class NotajualController extends Controller
                                 'notajuals_id' => $notajual->id,
                                 'produkbatches_id' => $batch->id,
                                 'quantity' => $terjual,
-                                'subtotal' => $terjual * $produk->sellingprice,
+                                'unitprice' => $finalPrice, // ✅ freeze WAC price
+                                'subtotal' => $terjual * $finalPrice,
                                 'created_at' => now(),
                                 'updated_at' => now(),
                             ]);
 
-                            $totalHarga += $terjual * $produk->sellingprice;
+                            $totalHarga += $terjual * $finalPrice;
                             $sisa -= $terjual;
                         }
                     }
@@ -527,6 +548,26 @@ class NotajualController extends Controller
                     // ==== REGULAR PRODUK ====
                     $sisa = $jumlah;
 
+                    $produk = \App\Models\Produk::findOrFail($produkId);
+
+                    // 🔥 CALCULATE WAC ONCE
+                    $wac = Produkbatches::where('produks_id', $produkId)
+                        ->where('stok', '>', 0)
+                        ->where('status', 'tersedia')
+                        ->where(function ($query) {
+                            $query->whereDate('tgl_kadaluarsa', '>', now())
+                                ->orWhereNull('tgl_kadaluarsa');
+                        })
+                        ->selectRaw('SUM(unitprice * stok) / SUM(stok) as wac')
+                        ->value('wac');
+
+                    if (!$wac) {
+                        throw new \Exception("Stok tidak tersedia untuk produk ID: {$produkId}");
+                    }
+
+                    $margin = $produk->sellingprice; // margin %
+                    $finalPrice = $wac * (1 + ($margin / 100));
+
                     $batches = Produkbatches::where('produks_id', $produkId)
                         ->where('stok', '>', 0)
                         ->where('status', 'tersedia')
@@ -534,12 +575,8 @@ class NotajualController extends Controller
                             $query->whereDate('tgl_kadaluarsa', '>', now())
                                 ->orWhereNull('tgl_kadaluarsa');
                         })
-                        // ->whereDate('tgl_kadaluarsa', '>', now())
-                        // ->OrwhereDate('tgl_kadaluarsa', '=', null)
                         ->orderBy('tgl_kadaluarsa')
                         ->get();
-
-                    $produk = \App\Models\Produk::findOrFail($produkId);
 
                     foreach ($batches as $batch) {
                         if ($sisa <= 0) break;
@@ -551,7 +588,8 @@ class NotajualController extends Controller
                             'notajuals_id' => $notajual->id,
                             'produkbatches_id' => $batch->id,
                             'quantity' => $terjual,
-                            'subtotal' => $terjual * $produk->sellingprice,
+                            'unitprice' => $finalPrice, // ✅ freeze WAC price
+                            'subtotal' => $terjual * $finalPrice,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
@@ -573,6 +611,21 @@ class NotajualController extends Controller
                     $totalQty = $produk->pivot->quantity * $jumlah;
                     $sisa = $totalQty;
 
+                    // 🔥 CALCULATE WAC ONCE
+                    $wac = Produkbatches::where('produks_id', $produk->id)
+                        ->where('stok', '>', 0)
+                        ->where('status', 'tersedia')
+                        ->whereDate('tgl_kadaluarsa', '>', now())
+                        ->selectRaw('SUM(unitprice * stok) / SUM(stok) as wac')
+                        ->value('wac');
+
+                    if (!$wac) {
+                        throw new \Exception("Stok tidak tersedia untuk produk ID: {$produk->id}");
+                    }
+
+                    $margin = $produk->sellingprice;
+                    $finalPrice = $wac * (1 + ($margin / 100));
+
                     $batches = Produkbatches::where('produks_id', $produk->id)
                         ->where('stok', '>', 0)
                         ->where('status', 'tersedia')
@@ -590,12 +643,13 @@ class NotajualController extends Controller
                             'notajuals_id' => $notajual->id,
                             'produkbatches_id' => $batch->id,
                             'quantity' => $terjual,
-                            'subtotal' => $terjual * $produk->sellingprice,
+                            'unitprice' => $finalPrice,
+                            'subtotal' => $terjual * $finalPrice,
                             'created_at' => now(),
                             'updated_at' => now(),
                         ]);
 
-                        $totalHarga += $terjual * $produk->sellingprice;
+                        $totalHarga += $terjual * $finalPrice;
                         $sisa -= $terjual;
                     }
                 }
@@ -615,11 +669,12 @@ class NotajualController extends Controller
             session()->forget(['cart', 'racikan_cart']);
             DB::commit();
 
-            return redirect()->route('notajuals.index')->with('success', 'Nota jual berhasil disimpan.');
+            return redirect()->route('notajuals.index')
+                ->with('success', 'Nota jual berhasil disimpan.');
         } catch (\Exception $e) {
             DB::rollBack();
-            dd($e);
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 

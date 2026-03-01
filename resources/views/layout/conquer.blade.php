@@ -160,12 +160,16 @@ License: You must have a valid license purchased only from themeforest(the above
                                 <span class="title">Dashboard</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="{{ route('profilapotek') }}">
-                                <i class="icon-note"></i>
-                                <span class="title">Profil Apotek</span>
-                            </a>
-                        </li>
+                        @auth
+                            <li>
+                                @if (auth()->user()->tipe_user === 'admin')
+                                    <a href="{{ route('profilapotek') }}">
+                                        <i class="icon-note"></i>
+                                        <span class="title">Profil Apotek</span>
+                                    </a>
+                                @endif
+                            </li>
+                        @endauth
                         <li>
                             <a href="javascript:;">
                                 <i class="icon-book-open"></i>
@@ -183,35 +187,39 @@ License: You must have a valid license purchased only from themeforest(the above
                                         <i class="icon-basket-loaded"></i>
                                         Beli Produk</a>
                                 </li>
-                                <li>
-                                    <a href="{{ route('transaksi') }}">
-                                        <i class="icon-book-open"></i> Daftar Nota <span class="arrow"></span>
-                                    </a>
-                                    <ul class="sub-menu">
-                                        <li>
-                                            <a href="{{ url('notajuals') }}">
-                                                <i class="icon-docs"></i>
-                                                Nota Penjualan
+                                @auth
+                                    <li>
+                                        @if (auth()->user()->tipe_user === 'admin')
+                                            <a href="{{ route('transaksi') }}">
+                                                <i class="icon-book-open"></i> Daftar Nota <span class="arrow"></span>
                                             </a>
-                                        </li>
-                                        <li>
-                                            <a href="{{ url('notabelis') }}">
-                                                <i class="icon-docs"></i>
-                                                Nota Pembelian</a>
-                                        </li>
-                                        <li>
-                                            <a href="{{ route('produks.daftarTerima') }}">
-                                                <i class="icon-docs"></i>
-                                                Nota Penerimaan</a>
-                                        </li>
-                                        <li>
-                                            <a href="{{ route('racikans.notaRacikan') }}">
-                                                <i class="icon-docs"></i>
-                                                Nota Peracikan
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
+                                            <ul class="sub-menu">
+                                                <li>
+                                                    <a href="{{ url('notajuals') }}">
+                                                        <i class="icon-docs"></i>
+                                                        Nota Penjualan
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ url('notabelis') }}">
+                                                        <i class="icon-docs"></i>
+                                                        Nota Pembelian</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('produks.daftarTerima') }}">
+                                                        <i class="icon-docs"></i>
+                                                        Nota Penerimaan</a>
+                                                </li>
+                                                <li>
+                                                    <a href="{{ route('racikans.notaRacikan') }}">
+                                                        <i class="icon-docs"></i>
+                                                        Nota Peracikan
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        @endif
+                                    </li>
+                                @endauth
                             </ul>
                         </li>
                         <li>
@@ -296,13 +304,13 @@ License: You must have a valid license purchased only from themeforest(the above
                                 <i class="icon-note"></i>
                                 <span class="title">Profil Apotek</span>
                             </a>
-                        </li>
+                        {{-- </li>
                         <li class="last ">
-                            <a href="{{ route('login') }}">
-                                <i class="icon-user"></i>
-                                <span class="title">Log in</span>
-                            </a>
-                        </li>
+                        <a href="{{ route('login') }}">
+                            <i class="icon-user"></i>
+                            <span class="title">Log in</span>
+                        </a>
+                    </li> --}}
                     @endif
                 </ul>
                 <!-- END SIDEBAR MENU -->

@@ -31,6 +31,7 @@
             'nama' => 'Nama Produk',
             'stok' => 'Stok',
             'sellingprice' => 'Harga Jual',
+            // 'sellingprice' => 'Margin Jual', dalam persen %
             'golongan' => 'Golongan',
             'deskripsi' => 'Deskripsi',
             'created_at' => 'Created Time',
