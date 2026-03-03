@@ -14,9 +14,9 @@
         <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
     </div>
     <div class="form-group">
-        <label for="sellingprice">Harga Produk</label>
+        <label for="sellingprice">Jumlah Margin Keuntungan</label>
         <input type="number" class="form-control" name="sellingprice" aria-describedby="nameHelp"
-            placeholder="Masukkan Harga Produk" value="{{$datas->sellingprice}}">
+            placeholder="Masukkan Margin Keuntungan" value="{{$datas->sellingprice}}">
         <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
     </div>
     <div class="form-group">

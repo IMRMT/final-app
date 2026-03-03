@@ -105,6 +105,8 @@ class ProdukController extends Controller
         $sortOrder = $request->get('sort_order', 'asc');
         $search = $request->get('search');
 
+
+
         // Load produk with summed stok from batches
         $query = Produk::withSum(
             ['produkbatches as total_stok' => function ($q) {
@@ -155,11 +157,34 @@ class ProdukController extends Controller
             $query->orderBy($sortBy, $sortOrder);
         }
 
-        return $query->paginate(6)->appends([
+        // return $query->paginate(6)->appends([
+        //     'search' => $search,
+        //     'sort_by' => $sortBy,
+        //     'sort_order' => $sortOrder,
+        // ]);
+
+        $produks = $query->paginate(6)->appends([
             'search' => $search,
             'sort_by' => $sortBy,
             'sort_order' => $sortOrder,
         ]);
+
+        // Calculate WAC + Final Price
+        foreach ($produks as $produk) {
+
+            $totalCost = $produk->produkbatches->sum(function ($batch) {
+                return $batch->unitprice * $batch->stok;
+            });
+
+            $totalStock = $produk->total_stok ?? 0;
+
+            $basePrice = $totalStock > 0 ? $totalCost / $totalStock : 0;
+
+            $produk->base_price = $basePrice;
+            $produk->final_price = $basePrice * (1 + ($produk->sellingprice / 100));
+        }
+
+        return $produks;
     }
 
 

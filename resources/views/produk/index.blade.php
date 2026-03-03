@@ -30,8 +30,9 @@
             'id' => 'Produk ID',
             'nama' => 'Nama Produk',
             'stok' => 'Stok',
-            'sellingprice' => 'Harga Jual',
-            // 'sellingprice' => 'Margin Jual', dalam persen %
+            'sellingprice' => 'Margin (%)',
+            'base_price' => 'Harga Modal (WAC)',
+            'final_price' => 'Harga Jual Final',
             'golongan' => 'Golongan',
             'deskripsi' => 'Deskripsi',
             'created_at' => 'Created Time',
@@ -57,7 +58,10 @@
                         <td>{{ $d->id }}</td>
                         <td>{{ $d->nama ?? '-' }}</td>
                         <td>{{ $d->total_stok ?? '-' }}</td>
-                        <td>Rp{{ $d->sellingprice ?? 0 }}</td>
+                        {{-- <td>Rp{{ $d->sellingprice ?? 0 }}</td> --}}
+                        <td>Rp{{ number_format($d->base_price ?? 0, 0, ',', '.') }}</td>
+                        <td>{{ $d->sellingprice ?? 0 }}%</td>
+                        <td>Rp{{ number_format($d->final_price ?? 0, 0, ',', '.') }}</td>
                         <td>{{ ucfirst($d->golongan ?? '-') }}</td>{{-- ucfirst untuk kapitalisai abjad pertama pada enum bebas -> Bebas --}}
                         <td>{{ $d->deskripsi ?? '-' }}</td>
                         <td>{{ $d->created_at }}</td>
