@@ -153,145 +153,172 @@ License: You must have a valid license purchased only from themeforest(the above
                         </div>
                         <!-- BEGIN SIDEBAR TOGGLER BUTTON -->
                     </li>
-                    @if (auth()->user()->tipe_user === 'apoteker')
-                        <li>
-                            <a href="{{ route('homeProduk') }}">
-                                <i class="icon-home"></i>
-                                <span class="title">Dashboard</span>
-                            </a>
-                        </li>
-                        @auth
+                    @if (auth()->user())
+
+                        {{-- ================= ADMIN & APOTEKER ================= --}}
+                        @if (auth()->user()->tipe_user === 'admin' || auth()->user()->tipe_user === 'apoteker')
+
                             <li>
-                                @if (auth()->user()->tipe_user === 'admin')
+                                <a href="{{ route('homeProduk') }}">
+                                    <i class="icon-home"></i>
+                                    <span class="title">Dashboard</span>
+                                </a>
+                            </li>
+
+                            {{-- ADMIN ONLY --}}
+                            @if (auth()->user()->tipe_user === 'admin')
+                                <li>
                                     <a href="{{ route('profilapotek') }}">
                                         <i class="icon-note"></i>
                                         <span class="title">Profil Apotek</span>
                                     </a>
-                                @endif
-                            </li>
-                        @endauth
-                        <li>
-                            <a href="javascript:;">
-                                <i class="icon-book-open"></i>
-                                <span class="title">Transaksi</span>
-                                <span class="arrow "></span>
-                            </a>
-                            <ul class="sub-menu">
-                                <li>
-                                    <a href="{{ url('notajuals/create') }}">
-                                        <i class="icon-basket-loaded"></i>
-                                        Jual Produk</a>
                                 </li>
-                                <li>
-                                    <a href="{{ url('notabelis/create') }}">
-                                        <i class="icon-basket-loaded"></i>
-                                        Beli Produk</a>
-                                </li>
-                                @auth
-                                    <li>
-                                        @if (auth()->user()->tipe_user === 'admin')
-                                            <a href="{{ route('transaksi') }}">
-                                                <i class="icon-book-open"></i> Daftar Nota <span class="arrow"></span>
-                                            </a>
-                                            <ul class="sub-menu">
-                                                <li>
-                                                    <a href="{{ url('notajuals') }}">
-                                                        <i class="icon-docs"></i>
-                                                        Nota Penjualan
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="{{ url('notabelis') }}">
-                                                        <i class="icon-docs"></i>
-                                                        Nota Pembelian</a>
-                                                </li>
-                                                <li>
-                                                    <a href="{{ route('produks.daftarTerima') }}">
-                                                        <i class="icon-docs"></i>
-                                                        Nota Penerimaan</a>
-                                                </li>
-                                                <li>
-                                                    <a href="{{ route('racikans.notaRacikan') }}">
-                                                        <i class="icon-docs"></i>
-                                                        Nota Peracikan
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        @endif
-                                    </li>
-                                @endauth
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="{{ route('produk') }}">
-                                <i class="icon-present"></i>
-                                <span class="title">Produk</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('racikan') }}">
-                                <i class="icon-briefcase"></i>
-                                <span class="title">Racikan</span>
-                            </a>
-                        </li>
-                        @auth
+                            @endif
+
                             <li>
-                                @if (auth()->user()->tipe_user === 'admin')
+                                <a href="javascript:;">
+                                    <i class="icon-book-open"></i>
+                                    <span class="title">Transaksi</span>
+                                    <span class="arrow"></span>
+                                </a>
+
+                                <ul class="sub-menu">
+
+                                    <li>
+                                        <a href="{{ url('notajuals/create') }}">
+                                            <i class="icon-basket-loaded"></i>
+                                            Jual Produk
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a href="{{ url('notabelis/create') }}">
+                                            <i class="icon-basket-loaded"></i>
+                                            Beli Produk
+                                        </a>
+                                    </li>
+
+                                    {{-- ADMIN EXTRA TRANSACTIONS --}}
+                                    @if (auth()->user()->tipe_user === 'admin' || auth()->user()->tipe_user === 'apoteker')
+                                        <li>
+                                            <a href="{{ url('notajuals') }}">
+                                                <i class="icon-docs"></i>
+                                                Nota Penjualan
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="{{ url('notabelis') }}">
+                                                <i class="icon-docs"></i>
+                                                Nota Pembelian
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="{{ route('produks.daftarTerima') }}">
+                                                <i class="icon-docs"></i>
+                                                Nota Penerimaan
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a href="{{ route('racikans.notaRacikan') }}">
+                                                <i class="icon-docs"></i>
+                                                Nota Peracikan
+                                            </a>
+                                        </li>
+                                    @endif
+
+                                </ul>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('produk') }}">
+                                    <i class="icon-present"></i>
+                                    <span class="title">Produk</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('racikan') }}">
+                                    <i class="icon-briefcase"></i>
+                                    <span class="title">Racikan</span>
+                                </a>
+                            </li>
+
+                            {{-- ADMIN USER MANAGEMENT --}}
+                            @if (auth()->user()->tipe_user === 'admin')
+                                <li>
                                     <a href="javascript:;">
                                         <i class="icon-user"></i>
                                         <span class="title">Karyawan</span>
-                                        <span class="arrow "></span>
+                                        <span class="arrow"></span>
                                     </a>
+
                                     <ul class="sub-menu">
                                         <li>
-                                            <a href="{{ route('register') }}">+👥 Register User</a>
+                                            <a href="{{ route('register') }}">
+                                                +👥 Register User
+                                            </a>
                                         </li>
+
                                         <li>
-                                            <a href="{{ route('user') }}">👥 Daftar Karyawan</a>
+                                            <a href="{{ route('user') }}">
+                                                👥 Daftar Karyawan
+                                            </a>
                                         </li>
                                     </ul>
-                                @endif
-                            </li>
-                        @endauth
-                        <li>
-                            <a href="{{ route('distributor') }}">
-                                <i class="icon-share"></i>
-                                <span class="title">Distributor</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('gudang') }}">
-                                <i class="icon-briefcase"></i>
-                                <span class="title">Gudang</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('satuan') }}">
-                                <i class="icon-layers"></i>
-                                <span class="title">Satuan produk</span>
-                            </a>
-                        </li>
-                        {{-- <li>
-                            <a href="{{ route('forecast') }}">
-                                <i class="icon-bar-chart"></i>
-                                <span class="title">Visual Forecasting Charts</span>
-                            </a>
-                        </li> --}}
-                    @elseif (auth()->user()->tipe_user === 'kasir')
-                        <li>
-                            <a href="javascript:;">
-                                <i class="icon-book-open"></i>
-                                <span class="title">Transaksi</span>
-                                <span class="arrow "></span>
-                            </a>
-                            <ul class="sub-menu">
-                                <li>
-                                    <a href="{{ url('notajuals/create') }}">
-                                        <i class="icon-basket-loaded"></i>
-                                        Jual Produk</a>
                                 </li>
-                            </ul>
-                        </li>
+                                {{-- <li> <a href="{{ route('forecast') }}">
+                                        <i class="icon-bar-chart">
+                                        </i> <span class="title">Visual Forecasting Charts</span>
+                                    </a>
+                                </li> --}}
+                            @endif
+
+                            <li>
+                                <a href="{{ route('distributor') }}">
+                                    <i class="icon-share"></i>
+                                    <span class="title">Distributor</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('gudang') }}">
+                                    <i class="icon-briefcase"></i>
+                                    <span class="title">Gudang</span>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('satuan') }}">
+                                    <i class="icon-layers"></i>
+                                    <span class="title">Satuan Produk</span>
+                                </a>
+                            </li>
+
+                            {{-- ================= KASIR ================= --}}
+                        @elseif(auth()->user()->tipe_user === 'kasir')
+                            <li>
+                                <a href="javascript:;">
+                                    <i class="icon-book-open"></i>
+                                    <span class="title">Transaksi</span>
+                                    <span class="arrow"></span>
+                                </a>
+
+                                <ul class="sub-menu">
+                                    <li>
+                                        <a href="{{ url('notajuals/create') }}">
+                                            <i class="icon-basket-loaded"></i>
+                                            Jual Produk
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                        @endif
+
+                        {{-- ================= GUEST ================= --}}
                     @else
                         <li>
                             <a href="{{ route('welcome') }}">
@@ -299,18 +326,14 @@ License: You must have a valid license purchased only from themeforest(the above
                                 <span class="title">Dashboard</span>
                             </a>
                         </li>
+
                         <li>
                             <a href="{{ route('profilapotek') }}">
                                 <i class="icon-note"></i>
                                 <span class="title">Profil Apotek</span>
                             </a>
-                        {{-- </li>
-                        <li class="last ">
-                        <a href="{{ route('login') }}">
-                            <i class="icon-user"></i>
-                            <span class="title">Log in</span>
-                        </a>
-                    </li> --}}
+                        </li>
+
                     @endif
                 </ul>
                 <!-- END SIDEBAR MENU -->

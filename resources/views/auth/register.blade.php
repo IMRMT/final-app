@@ -8,7 +8,7 @@
                 <div class="card-header">{{ __('Register') }}</div>
 
                 <div class="card-body">
-                    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('register.store') }}" enctype="multipart/form-data">
                         @csrf
 
                         <div class="row mb-3">
@@ -94,8 +94,10 @@
                         
                             <div class="col-md-6">
                                 <select class="form-control" name="tipe_user" aria-describedby="tipeUserHelp" required>
-                                    <option value="karyawan">Karyawan</option>
+                                    {{-- <option value="karyawan">Karyawan</option> --}}
                                     <option value="admin">Admin</option>
+                                    <option value="apoteker">Apoteker</option>
+                                    <option value="kasir">Kasir</option>
                                 </select>
                                 <small id="tipeUserHelp" class="form-text text-muted">Mohon pilih input yang diinginkan.</small>
                             </div>

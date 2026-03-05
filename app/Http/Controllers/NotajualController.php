@@ -358,7 +358,7 @@ class NotajualController extends Controller
                 DB::raw('MIN(produkbatches.tgl_kadaluarsa) as tgl_kadaluarsa'),
                 DB::raw('MIN(produkbatches.distributors_id) as distributors_id')
             )
-            ->groupBy('produks.id', 'produks.nama', 'produks.image', 'satuan_nama');
+            ->groupBy('produks.id', 'produks.nama', 'produks.image', 'satuan_nama', 'sellingprice');
 
         if ($search) {
             $produksQuery->where('produks.nama', 'like', '%' . $search . '%');
@@ -464,6 +464,174 @@ class NotajualController extends Controller
     //     return redirect()->route('transaksi')->with('status', 'Penjualan Tercatat');
     // }
 
+    // public function store(Request $request)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $pegawaiId = $request->input('pegawai_id');
+
+    //         $notajual = Notajual::create([
+    //             'pegawai_id' => $pegawaiId,
+    //         ]);
+
+    //         $ids = $request->input('id');
+    //         $quantities = $request->input('quantity');
+    //         $isRacikanFlags = $request->input('is_racikan', []);
+
+    //         // Process each product
+    //         foreach ($ids as $i => $produkId) {
+    //             $jumlah = $quantities[$i];
+    //             $isRacikan = $isRacikanFlags[$i] == '1';
+
+    //             if ($isRacikan) {
+    //                 // ==== RACIKAN ====
+    //                 $racikan = Racikan::with('produks')->findOrFail($produkId);
+    //                 $totalHarga = 0;
+
+    //                 foreach ($racikan->produks as $produk) {
+    //                     $totalQty = $produk->pivot->quantity * $jumlah;
+    //                     $sisa = $totalQty;
+
+    //                     $batches = Produkbatches::where('produks_id', $produk->id)
+    //                         ->where('stok', '>', 0)
+    //                         ->where('status', 'tersedia')
+    //                         ->whereDate('tgl_kadaluarsa', '>', now())
+    //                         ->orderBy('tgl_kadaluarsa')
+    //                         ->get();
+
+    //                     foreach ($batches as $batch) {
+    //                         if ($sisa <= 0) break;
+
+    //                         $terjual = min($sisa, $batch->stok);
+    //                         $batch->decrement('stok', $terjual);
+
+    //                         DB::table('notajuals_has_produks')->insert([
+    //                             'notajuals_id' => $notajual->id,
+    //                             'produkbatches_id' => $batch->id,
+    //                             'quantity' => $terjual,
+    //                             'subtotal' => $terjual * $produk->sellingprice,
+    //                             'created_at' => now(),
+    //                             'updated_at' => now(),
+    //                         ]);
+
+    //                         $totalHarga += $terjual * $produk->sellingprice;
+    //                         $sisa -= $terjual;
+    //                     }
+    //                 }
+
+    //                 $totalHarga += $racikan->biaya_embalase;
+
+    //                 DB::table('notajuals_has_racikans')->insert([
+    //                     'notajuals_id' => $notajual->id,
+    //                     'racikans_id' => $racikan->id,
+    //                     'quantity' => $jumlah,
+    //                     'subtotal' => $totalHarga,
+    //                     'created_at' => now(),
+    //                     'updated_at' => now(),
+    //                 ]);
+    //             } else {
+    //                 // ==== REGULAR PRODUK ====
+    //                 $sisa = $jumlah;
+
+    //                 $batches = Produkbatches::where('produks_id', $produkId)
+    //                     ->where('stok', '>', 0)
+    //                     ->where('status', 'tersedia')
+    //                     ->where(function ($query) {
+    //                         $query->whereDate('tgl_kadaluarsa', '>', now())
+    //                             ->orWhereNull('tgl_kadaluarsa');
+    //                     })
+    //                     ->orderBy('tgl_kadaluarsa')
+    //                     ->get();
+
+    //                 $produk = \App\Models\Produk::findOrFail($produkId);
+
+    //                 foreach ($batches as $batch) {
+    //                     if ($sisa <= 0) break;
+
+    //                     $terjual = min($sisa, $batch->stok);
+    //                     $batch->decrement('stok', $terjual);
+
+    //                     DB::table('notajuals_has_produks')->insert([
+    //                         'notajuals_id' => $notajual->id,
+    //                         'produkbatches_id' => $batch->id,
+    //                         'quantity' => $terjual,
+    //                         'subtotal' => $terjual * $produk->sellingprice,
+    //                         'created_at' => now(),
+    //                         'updated_at' => now(),
+    //                     ]);
+
+    //                     $sisa -= $terjual;
+    //                 }
+    //             }
+    //         }
+
+    //         // ==== RACIKAN CART ====
+    //         $racikanCart = session('racikan_cart', []);
+
+    //         foreach ($racikanCart as $item) {
+    //             $racikanId = $item['racikan_id'];
+    //             $jumlah = $item['jumlah'];
+    //             $racikan = Racikan::with('produks')->findOrFail($racikanId);
+    //             $totalHarga = 0;
+
+    //             foreach ($racikan->produks as $produk) {
+    //                 $totalQty = $produk->pivot->quantity * $jumlah;
+    //                 $sisa = $totalQty;
+
+    //                 $batches = Produkbatches::where('produks_id', $produk->id)
+    //                     ->where('stok', '>', 0)
+    //                     ->where('status', 'tersedia')
+    //                     ->whereDate('tgl_kadaluarsa', '>', now())
+    //                     ->orderBy('tgl_kadaluarsa')
+    //                     ->get();
+
+    //                 foreach ($batches as $batch) {
+    //                     if ($sisa <= 0) break;
+
+    //                     $terjual = min($sisa, $batch->stok);
+    //                     $batch->decrement('stok', $terjual);
+
+    //                     DB::table('notajuals_has_produks')->insert([
+    //                         'notajuals_id' => $notajual->id,
+    //                         'produkbatches_id' => $batch->id,
+    //                         'quantity' => $terjual,
+    //                         'subtotal' => $terjual * $produk->sellingprice,
+    //                         'created_at' => now(),
+    //                         'updated_at' => now(),
+    //                     ]);
+
+    //                     $totalHarga += $terjual * $produk->sellingprice;
+    //                     $sisa -= $terjual;
+    //                 }
+    //             }
+
+    //             $totalHarga += $racikan->biaya_embalase;
+
+    //             DB::table('notajuals_has_racikans')->insert([
+    //                 'notajuals_id' => $notajual->id,
+    //                 'racikans_id' => $racikanId,
+    //                 'quantity' => $jumlah,
+    //                 'subtotal' => $totalHarga,
+    //                 'created_at' => now(),
+    //                 'updated_at' => now(),
+    //             ]);
+    //         }
+
+    //         // Clear carts
+    //         session()->forget(['cart', 'racikan_cart']);
+
+    //         DB::commit();
+
+    //         return redirect()->route('notajuals.index')
+    //             ->with('success', 'Nota jual berhasil disimpan.');
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         dd($e);
+    //         return redirect()->back()
+    //             ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+    //     }
+    // }
+
     public function store(Request $request)
     {
         DB::beginTransaction();
@@ -478,6 +646,7 @@ class NotajualController extends Controller
             $quantities = $request->input('quantity');
             $isRacikanFlags = $request->input('is_racikan', []);
 
+            // Process each product
             foreach ($ids as $i => $produkId) {
                 $jumlah = $quantities[$i];
                 $isRacikan = $isRacikanFlags[$i] == '1';
@@ -491,7 +660,7 @@ class NotajualController extends Controller
                         $totalQty = $produk->pivot->quantity * $jumlah;
                         $sisa = $totalQty;
 
-                        // 🔥 CALCULATE WAC ONCE
+                        // Calculate Weighted Average Cost (WAC)
                         $wac = Produkbatches::where('produks_id', $produk->id)
                             ->where('stok', '>', 0)
                             ->where('status', 'tersedia')
@@ -503,8 +672,7 @@ class NotajualController extends Controller
                             throw new \Exception("Stok tidak tersedia untuk produk ID: {$produk->id}");
                         }
 
-                        $margin = $produk->sellingprice; // margin %
-                        $finalPrice = $wac * (1 + ($margin / 100));
+                        $finalPrice = $wac * (1 + ($produk->sellingprice / 100));
 
                         $batches = Produkbatches::where('produks_id', $produk->id)
                             ->where('stok', '>', 0)
@@ -523,7 +691,6 @@ class NotajualController extends Controller
                                 'notajuals_id' => $notajual->id,
                                 'produkbatches_id' => $batch->id,
                                 'quantity' => $terjual,
-                                'unitprice' => $finalPrice, // ✅ freeze WAC price
                                 'subtotal' => $terjual * $finalPrice,
                                 'created_at' => now(),
                                 'updated_at' => now(),
@@ -550,7 +717,7 @@ class NotajualController extends Controller
 
                     $produk = \App\Models\Produk::findOrFail($produkId);
 
-                    // 🔥 CALCULATE WAC ONCE
+                    // Calculate Weighted Average Cost (WAC)
                     $wac = Produkbatches::where('produks_id', $produkId)
                         ->where('stok', '>', 0)
                         ->where('status', 'tersedia')
@@ -565,8 +732,7 @@ class NotajualController extends Controller
                         throw new \Exception("Stok tidak tersedia untuk produk ID: {$produkId}");
                     }
 
-                    $margin = $produk->sellingprice; // margin %
-                    $finalPrice = $wac * (1 + ($margin / 100));
+                    $finalPrice = $wac * (1 + ($produk->sellingprice / 100));
 
                     $batches = Produkbatches::where('produks_id', $produkId)
                         ->where('stok', '>', 0)
@@ -588,7 +754,6 @@ class NotajualController extends Controller
                             'notajuals_id' => $notajual->id,
                             'produkbatches_id' => $batch->id,
                             'quantity' => $terjual,
-                            'unitprice' => $finalPrice, // ✅ freeze WAC price
                             'subtotal' => $terjual * $finalPrice,
                             'created_at' => now(),
                             'updated_at' => now(),
@@ -601,6 +766,7 @@ class NotajualController extends Controller
 
             // ==== RACIKAN CART ====
             $racikanCart = session('racikan_cart', []);
+
             foreach ($racikanCart as $item) {
                 $racikanId = $item['racikan_id'];
                 $jumlah = $item['jumlah'];
@@ -611,7 +777,7 @@ class NotajualController extends Controller
                     $totalQty = $produk->pivot->quantity * $jumlah;
                     $sisa = $totalQty;
 
-                    // 🔥 CALCULATE WAC ONCE
+                    // Calculate WAC
                     $wac = Produkbatches::where('produks_id', $produk->id)
                         ->where('stok', '>', 0)
                         ->where('status', 'tersedia')
@@ -623,8 +789,7 @@ class NotajualController extends Controller
                         throw new \Exception("Stok tidak tersedia untuk produk ID: {$produk->id}");
                     }
 
-                    $margin = $produk->sellingprice;
-                    $finalPrice = $wac * (1 + ($margin / 100));
+                    $finalPrice = $wac * (1 + ($produk->sellingprice / 100));
 
                     $batches = Produkbatches::where('produks_id', $produk->id)
                         ->where('stok', '>', 0)
@@ -643,7 +808,6 @@ class NotajualController extends Controller
                             'notajuals_id' => $notajual->id,
                             'produkbatches_id' => $batch->id,
                             'quantity' => $terjual,
-                            'unitprice' => $finalPrice,
                             'subtotal' => $terjual * $finalPrice,
                             'created_at' => now(),
                             'updated_at' => now(),
@@ -666,13 +830,16 @@ class NotajualController extends Controller
                 ]);
             }
 
+            // Clear carts
             session()->forget(['cart', 'racikan_cart']);
+
             DB::commit();
 
             return redirect()->route('notajuals.index')
                 ->with('success', 'Nota jual berhasil disimpan.');
         } catch (\Exception $e) {
             DB::rollBack();
+            dd($e);
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }

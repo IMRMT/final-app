@@ -41,7 +41,9 @@
                 <label for="tipe_user">Tipe User</label>
                 <select class="form-control" name="tipe_user" aria-describedby="nameHelp">
                     <option value="admin" {{ $datas->tipe_user == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="karyawan" {{ $datas->tipe_user == 'karyawan' ? 'selected' : '' }}>Karyawan</option>
+                    <option value="apoteker" {{ $datas->tipe_user == 'apoteker' ? 'selected' : '' }}>Apoteker</option>
+                    <option value="kasir" {{ $datas->tipe_user == 'kasir' ? 'selected' : '' }}>Kasir</option>
+                    {{-- <option value="karyawan" {{ $datas->tipe_user == 'karyawan' ? 'selected' : '' }}>Karyawan</option> --}}
                 </select>
                 <small id="nameHelp" class="form-text text-muted">Mohon pilih input yang diinginkan.</small>
             </div>

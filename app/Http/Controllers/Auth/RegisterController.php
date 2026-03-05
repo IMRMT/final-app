@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Request;
 
 class RegisterController extends Controller
 {
@@ -68,11 +69,11 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         $imageName = null;
-    if (request()->hasFile('image')) {
-        $file = request()->file('image');
-        $imageName = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('user_image'), $imageName);
-    }
+        if (request()->hasFile('image')) {
+            $file = request()->file('image');
+            $imageName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('user_image'), $imageName);
+        }
 
         return User::create([
             'nama' => $data['nama'],
@@ -83,5 +84,22 @@ class RegisterController extends Controller
             'image' => $imageName,
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+    public function register(Request $request)
+    {
+        $data = $request->all();
+
+        // Validate the request
+        $this->validator($data)->validate();
+
+        // Create the user
+        $user = $this->create($data);
+
+        // Optionally, log the user in
+        // Auth::login($user);
+
+        return redirect()->route('user')
+            ->with('success', 'User berhasil dibuat.');
     }
 }
