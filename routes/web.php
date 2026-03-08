@@ -166,8 +166,8 @@ Route::middleware(['auth', IsAdminOrApoteker::class])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
-    Route::get('/home-produk', [ProdukController::class, 'homeProduk'])->name('homeProduk');
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/home', [ProdukController::class, 'homeProduk'])->name('homeProduk');
 
     Route::resource('notajuals', NotajualController::class);
 

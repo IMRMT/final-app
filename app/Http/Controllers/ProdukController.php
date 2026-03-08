@@ -201,12 +201,89 @@ class ProdukController extends Controller
         ]);
     }
 
+    private function getExpiredBatchNotifications()
+    {
+        $batches = Produkbatches::join('produks', 'produks.id', '=', 'produkbatches.produks_id')
+            ->where('status', 'tersedia')
+            ->whereNotNull('tgl_kadaluarsa')
+            // ->sum('stok')
+            ->get();
+
+        $produks = Produk::withSum(
+            ['produkbatches as total_stok' => function ($q) {
+                $q->where('status', 'tersedia')
+                    ->where(function ($sub) {
+                        $sub->whereDate('tgl_kadaluarsa', '>', now())
+                            ->orWhereNull('tgl_kadaluarsa');
+                    });
+            }],
+            'stok'
+        )->get();
+
+        // produk::join('produkbatches', 'produkbatches.produks_id', '=', 'produks.id')
+        //     ->where('status', 'tersedia')
+        //     ->whereNotNull('tgl_kadaluarsa')
+        //     ->withsum('produkbatches')
+        //     ->get();
+
+        $expiredBatches = $batches->filter(function ($batch) {
+            return $batch->tgl_kadaluarsa <= now();
+        });
+
+        // $criticalQtyProducts = $produks->filter(fn($produk) => ($produk->total_stok ?? 0) <= 20);
+
+        $criticalQtyProducts = $produks->map(function ($produk) {
+            // If total_stok is null, treat as 0
+            $totalStok = $produk->total_stok ?? 0;
+
+            return [
+                'nama' => $produk->nama,
+                'total_stok' => $totalStok,
+                'is_critical' => $totalStok <= 20, // flag for critical stock
+            ];
+        });
+
+        $sixMonthBatches = $batches->filter(function ($batch) {
+            return $batch->tgl_kadaluarsa > now() &&
+                $batch->tgl_kadaluarsa <= Carbon::now()->addMonths(6);
+        });
+
+        $expiredBatchList = $expiredBatches->map(function ($b) {
+            return "Produk: {$b->produks->nama} telah kadaluarsa! (Batch ID: {$b->id})";
+        });
+
+        
+        $criticalQtyBatchesList = $criticalQtyProducts->filter(fn($p) => $p['is_critical'])
+            ->map(fn($p) => "Produk: {$p['nama']} mengalami kritis jumlah stok! (Total Stok: {$p['total_stok']})");
+
+        // If empty, show "0"
+        if ($criticalQtyBatchesList->isEmpty()) {
+            $criticalQtyBatchesList = collect(["Tidak ada produk dengan stok kritis (0)"]);
+        }
+
+        // $criticalQtyBatchesList = $criticalQtyProducts->map(
+        //     fn($p) =>
+        //     "Produk: {$p['nama']} mengalami kritis jumlah stok! (Total Stok: {$p['total_stok']})"
+        // );
+
+        $sixMonthBatchList = $sixMonthBatches->map(function ($b) {
+            return "Produk: {$b->produks->nama} akan kadaluarsa dalam 6 bulan! (Batch ID: {$b->id})";
+        });
+
+        return [
+            'expired' => $expiredBatchList,
+            'stockcritical' => $criticalQtyBatchesList,
+            'sixmonths' => $sixMonthBatchList
+        ];
+    }
+
     public function homeProduk(Request $request)
     {
         $produks = $this->getFilteredProduk($request);
 
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
+        $batchNotifications = $this->getExpiredBatchNotifications();
 
         // Sales data
         $salesData = DB::table('notajuals_has_produks')
@@ -255,6 +332,9 @@ class ProdukController extends Controller
             'chartLabelsPurchases' => $chartLabelsPurchases,
             'chartDataPurchases' => $chartDataPurchases,
             'totalPurchasesRupiah' => $totalPurchasesRupiah,
+            'expired_batches' => $batchNotifications['expired'],
+            'cirital_stocks' => $batchNotifications['stockcritical'],
+            'sixmonthsexpired_batches' => $batchNotifications['sixmonths']
         ]);
     }
 
