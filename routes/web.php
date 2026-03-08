@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -29,7 +30,7 @@ Route::get('/', [ProdukController::class, 'welcomeProduk'])->name('welcome');
 Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 Route::get('/profilapotek', [ProfilapotekController::class, 'index'])->name('profilapotek');
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
 Route::post('/logout', function () {
     Session::forget('cart');
@@ -46,9 +47,8 @@ Route::post('/logout', function () {
 
 Route::middleware(['auth', IsAdmin::class])->group(function () {
 
-    // Route::get('/register', function () {
-    //     return view('auth.register');
-    // })->name('register');
+    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('registerUser');
+    Route::post('/register', [RegisterController::class, 'register'])->name('register');
 
     Route::resource('users', UserController::class);
     Route::resource('distributors', DistributorController::class);

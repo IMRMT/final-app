@@ -257,7 +257,7 @@ License: You must have a valid license purchased only from themeforest(the above
 
                                     <ul class="sub-menu">
                                         <li>
-                                            <a href="{{ route('register') }}">
+                                            <a href="{{ route('registerUser') }}">
                                                 +👥 Register User
                                             </a>
                                         </li>
