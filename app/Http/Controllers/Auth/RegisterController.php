@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Symfony\Component\HttpFoundation\Request;
 
 class RegisterController extends Controller
 {
@@ -29,7 +30,16 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/';
+
+    public function register(Request $request)
+    {
+        $this->validator($request->all())->validate();
+
+        event(new Registered($user = $this->create($request->all())));
+
+        return redirect('users')->with('status', 'User created successfully');
+    }
 
     /**
      * Create a new controller instance.
@@ -55,7 +65,7 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'username' => ['required', 'string', 'max:30', 'unique:users'],
             'no_hp' => ['required', 'string', 'max:20'],
-            'tipe_user' => ['required', 'in:admin,karyawan'],
+            'tipe_user' => ['required', 'in:admin,apoteker,kasir'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ]);
     }
@@ -84,22 +94,20 @@ class RegisterController extends Controller
             'image' => $imageName,
             'password' => Hash::make($data['password']),
         ]);
+        // User::create([
+        //     'nama' => $data['nama'],
+        //     'email' => $data['email'],
+        //     'no_hp' => $data['no_hp'],
+        //     'username' => $data['username'],
+        //     'tipe_user' => $data['tipe_user'],
+        //     'image' => $imageName,
+        //     'password' => Hash::make($data['password']),
+        // ]);
+
+        // return redirect('users')->with('status', 'User created successfully');
     }
-
-    public function register(Request $request)
+    protected function registered(Request $request, $user)
     {
-        $data = $request->all();
-
-        // Validate the request
-        $this->validator($data)->validate();
-
-        // Create the user
-        $user = $this->create($data);
-
-        // Optionally, log the user in
-        // Auth::login($user);
-
-        return redirect()->route('user')
-            ->with('success', 'User berhasil dibuat.');
+        return redirect('users')->with('status', 'User created successfully');
     }
 }

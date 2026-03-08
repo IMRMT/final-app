@@ -29,7 +29,7 @@ Route::get('/', [ProdukController::class, 'welcomeProduk'])->name('welcome');
 Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 Route::get('/profilapotek', [ProfilapotekController::class, 'index'])->name('profilapotek');
 
-Auth::routes(['register' => false]);
+Auth::routes();
 
 Route::post('/logout', function () {
     Session::forget('cart');
@@ -46,11 +46,9 @@ Route::post('/logout', function () {
 
 Route::middleware(['auth', IsAdmin::class])->group(function () {
 
-    Route::get('/register', function () {
-        return view('auth.register');
-    })->name('register');
-    Route::post('/register', [\App\Http\Controllers\Auth\RegisterController::class, 'register'])->name('register.store');
-
+    // Route::get('/register', function () {
+    //     return view('auth.register');
+    // })->name('register');
 
     Route::resource('users', UserController::class);
     Route::resource('distributors', DistributorController::class);
@@ -168,7 +166,7 @@ Route::middleware(['auth', IsAdminOrApoteker::class])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    // Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('/home-produk', [ProdukController::class, 'homeProduk'])->name('homeProduk');
 
     Route::resource('notajuals', NotajualController::class);
