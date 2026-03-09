@@ -252,7 +252,7 @@ class ProdukController extends Controller
             return "Produk: {$b->produks->nama} telah kadaluarsa! (Batch ID: {$b->id})";
         });
 
-        
+
         $criticalQtyBatchesList = $criticalQtyProducts->filter(fn($p) => $p['is_critical'])
             ->map(fn($p) => "Produk: {$p['nama']} mengalami kritis jumlah stok! (Total Stok: {$p['total_stok']})");
 

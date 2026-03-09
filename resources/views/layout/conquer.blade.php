@@ -240,6 +240,13 @@ License: You must have a valid license purchased only from themeforest(the above
                             </li>
 
                             <li>
+                                <a href="{{ route('opname') }}">
+                                    <i class="icon-docs"></i>
+                                    <span class="title">Stok Opname</span>
+                                </a>
+                            </li>
+
+                            <li>
                                 <a href="{{ route('racikan') }}">
                                     <i class="icon-briefcase"></i>
                                     <span class="title">Racikan</span>

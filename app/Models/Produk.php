@@ -21,4 +21,9 @@ class Produk extends Model
     {
         return $this->hasMany(Racikanproduk::class, 'produks_id');
     }
+
+    public function produkOpnames(): HasMany
+    {
+        return $this->hasMany(Produkopnames::class, 'produks_id');
+    }
 }

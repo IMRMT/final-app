@@ -16,7 +16,7 @@ use App\Http\Controllers\ProfilapotekController;
 use App\Http\Controllers\RacikanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\HomeController;
-
+use App\Http\Controllers\ProdukopnameController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsAdminOrApoteker;
 
@@ -120,12 +120,14 @@ Route::middleware(['auth', IsAdminOrApoteker::class])->group(function () {
     Route::resource('produks', ProdukController::class);
     Route::resource('racikans', RacikanController::class);
     Route::resource('gudangs', GudangController::class);
+    Route::resource('opnames', ProdukopnameController::class);
 
     Route::get('/distributor', [DistributorController::class, 'index'])->name('distributor');
     Route::get('/satuan', [SatuanController::class, 'index'])->name('satuan');
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk');
     Route::get('/racikan', [RacikanController::class, 'index'])->name('racikan');
     Route::get('/gudang', [GudangController::class, 'index'])->name('gudang');
+    Route::get('/opname', [ProdukopnameController::class, 'index'])->name('opname');
 
     Route::get('produk/terimaBatch/{id}', [ProdukController::class, 'terimaBatch'])->name('produks.terimaBatch');
     Route::put('produk/updateTerimaBatch/{id}', [ProdukController::class, 'updateTerimaBatch'])->name('produks.updateTerimaBatch');
