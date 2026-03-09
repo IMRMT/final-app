@@ -689,6 +689,89 @@ class ProdukController extends Controller
         ]);
     }
 
+    public function daftarKadaluarsa(Request $request)
+    {
+        $query = Produk::query()
+            ->join('produkbatches', 'produkbatches.produks_id', '=', 'produks.id')
+            ->join('satuans', 'produkbatches.satuans_id', '=', 'satuans.id')
+            ->select(
+                'produks.nama as nama_produk',
+                'satuans.nama as nama_satuan',
+                'produkbatches.id as batch_id',
+                'produkbatches.tgl_kadaluarsa'
+            )
+            ->selectRaw('SUM(produkbatches.stok) as stok')
+            ->selectRaw('
+            (SUM(produkbatches.unitprice * produkbatches.stok) / NULLIF(SUM(produkbatches.stok),0))
+            * (1 + (produks.sellingprice/100)) as hpp
+        ')
+            ->selectRaw('
+            (
+                (SUM(produkbatches.unitprice * produkbatches.stok) / NULLIF(SUM(produkbatches.stok),0))
+                * (1 + (produks.sellingprice/100))
+            ) * SUM(produkbatches.stok) as total_harga
+        ')
+            ->where('produkbatches.tgl_kadaluarsa', '<', now())
+            ->groupBy(
+                'produkbatches.id',
+                'produks.nama',
+                'satuans.nama',
+                'produkbatches.tgl_kadaluarsa',
+                'produks.sellingprice'
+            );
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('produkbatches.id', 'LIKE', "%$search%")
+                    ->orWhere('produks.nama', 'LIKE', "%$search%")
+                    ->orWhere('satuans.nama', 'LIKE', "%$search%")
+                    ->orWhere('produkbatches.tgl_kadaluarsa', 'LIKE', "%$search%");
+            })
+                ->havingRaw('hpp LIKE ?', ["%$search%"])
+                ->orHavingRaw('total_harga LIKE ?', ["%$search%"]);
+        }
+
+        $sortBy = $request->get('sort_by', 'tgl_kadaluarsa');
+        $sortOrder = $request->get('sort_order', 'asc');
+
+        switch ($sortBy) {
+            case 'batch_id':
+                $query->orderBy('produkbatches.id', $sortOrder);
+                break;
+            case 'nama_produk':
+                $query->orderBy('produks.nama', $sortOrder);
+                break;
+            case 'nama_satuan':
+                $query->orderBy('satuans.nama', $sortOrder);
+                break;
+            case 'hpp':
+                $query->orderBy('hpp', $sortOrder);
+                break;
+            case 'total_harga':
+                $query->orderBy('total_harga', $sortOrder);
+                break;
+            case 'tgl_kadaluarsa':
+                $query->orderBy('tgl_kadaluarsa', $sortOrder);
+                break;
+            default:
+                $query->orderBy($sortBy, $sortOrder);
+                break;
+        }
+
+        $datas = $query->paginate(10)->appends([
+            'search' => $search,
+            'sort_by' => $sortBy,
+            'sort_order' => $sortOrder,
+        ]);
+
+        return view('transaksi.daftarKadaluarsa', [
+            'datas' => $datas,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder,
+            'search' => $search
+        ]);
+    }
+
     public function print($id)
     {
         $nota = Terimabatches::with(['user', 'produkbatches.produks', 'gudangs'])->findOrFail($id);

@@ -227,6 +227,13 @@ License: You must have a valid license purchased only from themeforest(the above
                                                 Nota Peracikan
                                             </a>
                                         </li>
+
+                                        <li>
+                                            <a href="{{ route('produks.daftarKadaluarsa') }}">
+                                                <i class="icon-docs"></i>
+                                                Nota Kadaluarsa
+                                            </a>
+                                        </li>
                                     @endif
 
                                 </ul>

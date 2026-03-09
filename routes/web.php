@@ -136,6 +136,7 @@ Route::middleware(['auth', IsAdminOrApoteker::class])->group(function () {
     Route::delete('produk/destroyBatch/{id}', [ProdukController::class, 'destroyBatch'])->name('produks.destroyBatch');
     Route::delete('produk/destroyTerima/{id}', [ProdukController::class, 'destroyTerima'])->name('produks.destroyTerima');
     Route::get('produk/daftarTerima', [ProdukController::class, 'daftarTerima'])->name('produks.daftarTerima');
+    Route::get('produk/daftarKadaluarsa', [ProdukController::class, 'daftarKadaluarsa'])->name('produks.daftarKadaluarsa');
 
     Route::get('produk/uploadImage/{id}', [ProdukController::class, 'uploadImage']);
     Route::post('produk/simpanImage', [ProdukController::class, 'simpanImage']);
