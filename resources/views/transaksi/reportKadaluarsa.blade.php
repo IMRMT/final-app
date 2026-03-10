@@ -34,37 +34,45 @@
 
     <div class="container">
 
-        <h1>Laporan Pembelian</h1>
+        <h1>Laporan kadaluarsa</h1>
         <!-- Table -->
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Nota ID</th>
+                    <th>ID Batch</th>
                     <th>ID Produk</th>
                     <th>Nama Produk</th>
-                    <th>Quantity</th>
-                    <th>Subtotal</th>
+                    <th>Jumlah Stok</th>
+                    <th>Satuan Batch</th>
+                    <th>HPP Produk</th>
+                    <th>Total Harga Produk</th>
+                    <th>Tanggal Kadaluarsa Produk</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($purchases as $purchase)
+                @foreach ($expires as $expire)
                     <tr>
-                        <td>{{ $purchase->notabeli->id ?? '-' }}</td>
-                        <td>{{ $purchase->produkbatches->produks_id ?? '-' }}</td>
-                        <td>{{ $purchase->produkbatches->produks->nama ?? '-' }}</td>
-                        <td>{{ $purchase->quantity }}</td>
-                        <td>Rp {{ number_format($purchase->subtotal, 0, ',', '.') }}</td>
+                    <tr>
+                        <td>{{ $expire->batch_id }}</td>
+                        <td>{{ $expire->produk_id }}</td>
+                        <td>{{ $expire->nama_produk }}</td>
+                        <td>{{ $expire->stok }}</td>
+                        <td>{{ $expire->nama_satuan }}</td>
+                        <td>Rp {{ number_format($expire->hpp, 0, ',', '.') }}</td>
+                        <td>Rp {{ number_format($expire->total_harga, 0, ',', '.') }}</td>
+                        <td>{{ $expire->tgl_kadaluarsa }}</td>
+                    </tr>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
-                    <th colspan="4">Total Penjualan</th>
+                    <th colspan="6">Total Harga Semua Produk</th>
                     <th>Rp {{ number_format($total, 0, ',', '.') }}</th>
                 </tr>
             </tfoot>
         </table>
         <button onclick="window.print()" class="btn btn-primary mt-3">Print Laporan</button>
-        <a href="{{ route('notabelis.csv', ['filter' => $filter]) }}" class="btn btn-success mt-3">Download CSV</a>
+        <a href="{{ route('produks.csvKadaluarsa', ['filter' => $filter]) }}" class="btn btn-success mt-3">Download CSV</a>
     </div>
 @endsection

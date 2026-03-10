@@ -19,8 +19,8 @@
             </div>
         </form>
         
-        <form method="GET" action="{{ route('produks.daftarKadaluarsa') }}">
-            <label for="groupBy">Lihat Laporan Penjualan:</label>
+        <form method="GET" action="{{ route('produks.reportKadaluarsa') }}">
+            <label for="groupBy">Lihat Laporan Kadaluarsa:</label>
             <select name="filter" id="groupBy" class="form-select w-auto d-inline mx-2">
                 <option value="">-- Pilih Grup --</option>
                 <option value="day">Hari Ini</option>

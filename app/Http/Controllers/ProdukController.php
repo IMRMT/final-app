@@ -689,12 +689,13 @@ class ProdukController extends Controller
         ]);
     }
 
-    public function daftarKadaluarsa(Request $request)
+    private function kadaluarsaQuery()
     {
-        $query = Produk::query()
+        return Produk::query()
             ->join('produkbatches', 'produkbatches.produks_id', '=', 'produks.id')
             ->join('satuans', 'produkbatches.satuans_id', '=', 'satuans.id')
             ->select(
+                'produks.id as produk_id',
                 'produks.nama as nama_produk',
                 'satuans.nama as nama_satuan',
                 'produkbatches.id as batch_id',
@@ -714,11 +715,17 @@ class ProdukController extends Controller
             ->where('produkbatches.tgl_kadaluarsa', '<', now())
             ->groupBy(
                 'produkbatches.id',
+                'produks.id',
                 'produks.nama',
                 'satuans.nama',
                 'produkbatches.tgl_kadaluarsa',
                 'produks.sellingprice'
             );
+    }
+
+    public function daftarKadaluarsa(Request $request)
+    {
+        $query = $this->kadaluarsaQuery();
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -770,6 +777,122 @@ class ProdukController extends Controller
             'sortOrder' => $sortOrder,
             'search' => $search
         ]);
+    }
+
+    public function reportKadaluarsa(Request $request)
+    {
+        $filter = $request->get('filter', 'day');
+
+        $query = $this->kadaluarsaQuery();
+
+        switch ($filter) {
+            case 'week':
+                $query->whereBetween('produkbatches.tgl_kadaluarsa', [
+                    now()->startOfWeek(),
+                    now()->endOfWeek()
+                ]);
+                break;
+
+            case 'month':
+                $query->whereYear('produkbatches.tgl_kadaluarsa', now()->year)
+                    ->whereMonth('produkbatches.tgl_kadaluarsa', now()->month);
+                break;
+
+            case 'year':
+                $query->whereYear('produkbatches.tgl_kadaluarsa', now()->year);
+                break;
+
+            case 'day':
+            default:
+                $query->whereDate('produkbatches.tgl_kadaluarsa', now());
+        }
+
+        $expires = $query->get();
+
+        $total = $expires->sum('total_harga');
+
+        return view('transaksi.reportKadaluarsa', compact('expires', 'total', 'filter'));
+    }
+
+    public function reportCsvKadaluarsa(Request $request)
+    {
+        $filter = $request->get('filter', 'day');
+
+        $query = $this->kadaluarsaQuery();
+
+        switch ($filter) {
+            case 'week':
+                $query->whereBetween('produkbatches.tgl_kadaluarsa', [
+                    now()->startOfWeek(),
+                    now()->endOfWeek()
+                ]);
+                break;
+
+            case 'month':
+                $query->whereYear('produkbatches.tgl_kadaluarsa', now()->year)
+                    ->whereMonth('produkbatches.tgl_kadaluarsa', now()->month);
+                break;
+
+            case 'year':
+                $query->whereYear('produkbatches.tgl_kadaluarsa', now()->year);
+                break;
+
+            case 'day':
+            default:
+                $query->whereDate('produkbatches.tgl_kadaluarsa', now());
+        }
+
+        $expires = $query->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="laporan_kadaluarsa.csv"',
+        ];
+
+        $callback = function () use ($expires) {
+
+            $file = fopen('php://output', 'w');
+
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, [
+                'Batch ID',
+                'ID Produk',
+                'Nama Produk',
+                'Stok',
+                'Satuan',
+                'HPP',
+                'Total Harga',
+                'Tanggal Kadaluarsa'
+            ], ';');
+
+            foreach ($expires as $expire) {
+
+                fputcsv($file, [
+                    $expire->batch_id,
+                    $expire->produk_id,
+                    $expire->nama_produk,
+                    $expire->stok,
+                    $expire->nama_satuan,
+                    number_format($expire->hpp, 0, ',', '.'),
+                    number_format($expire->total_harga, 0, ',', '.'),
+                    $expire->tgl_kadaluarsa
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function printKadaluarsa($id)
+    {
+        $nota = $this->kadaluarsaQuery()
+            ->where('produkbatches.id', $id)
+            ->firstOrFail();
+
+        return view('transaksi.nkPrint', compact('nota'));
     }
 
     public function print($id)

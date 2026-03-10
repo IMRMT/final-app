@@ -20,24 +20,6 @@ use App\Http\Controllers\ProdukopnameController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsAdminOrApoteker;
 
-/*
-|--------------------------------------------------------------------------
-| PUBLIC ROUTES
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/', [ProdukController::class, 'welcomeProduk'])->name('welcome');
-Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
-Route::get('/profilapotek', [ProfilapotekController::class, 'index'])->name('profilapotek');
-
-Auth::routes(['register' => false]);
-
-Route::post('/logout', function () {
-    Session::forget('cart');
-    Auth::logout();
-    return redirect()->route('welcome');
-})->name('logout');
-
 
 /*
 |--------------------------------------------------------------------------
@@ -138,6 +120,10 @@ Route::middleware(['auth', IsAdminOrApoteker::class])->group(function () {
     Route::get('produk/daftarTerima', [ProdukController::class, 'daftarTerima'])->name('produks.daftarTerima');
     Route::get('produk/daftarKadaluarsa', [ProdukController::class, 'daftarKadaluarsa'])->name('produks.daftarKadaluarsa');
 
+    Route::get('produk/report/reportKadaluarsa', [ProdukController::class, 'reportKadaluarsa'])->name('produks.reportKadaluarsa');
+    Route::get('produk/report/reportKadaluarsa/csv', [ProdukController::class, 'reportCsvKadaluarsa'])->name('produks.csvKadaluarsa');
+    Route::get('produk/printKadaluarsa/{id}', [ProdukController::class, 'printKadaluarsa'])->name('produks.printKadaluarsa');
+
     Route::get('produk/uploadImage/{id}', [ProdukController::class, 'uploadImage']);
     Route::post('produk/simpanImage', [ProdukController::class, 'simpanImage']);
 
@@ -190,3 +176,21 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/notajuals/cart/delete/{id}', [NotajualController::class, 'deleteFromCart'])->name('notajualscart.delete');
     Route::get('/notajuals/{id}/print', [NotajualController::class, 'print'])->name('notajuals.print');
 });
+
+/*
+|--------------------------------------------------------------------------
+| PUBLIC ROUTES
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', [ProdukController::class, 'welcomeProduk'])->name('welcome');
+Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show'); //ini harus berada di paling bawah agar tidak tabrakan dengan route yang identik
+Route::get('/profilapotek', [ProfilapotekController::class, 'index'])->name('profilapotek');
+
+Auth::routes(['register' => false]);
+
+Route::post('/logout', function () {
+    Session::forget('cart');
+    Auth::logout();
+    return redirect()->route('welcome');
+})->name('logout');
