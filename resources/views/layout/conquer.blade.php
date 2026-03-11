@@ -234,6 +234,13 @@ License: You must have a valid license purchased only from themeforest(the above
                                                 Nota Kadaluarsa
                                             </a>
                                         </li>
+
+                                        <li>
+                                            <a href="{{ route('racikans.daftarNarkotika') }}">
+                                                <i class="icon-docs"></i>
+                                                Nota Narkotika
+                                            </a>
+                                        </li>
                                     @endif
 
                                 </ul>

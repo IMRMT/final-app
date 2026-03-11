@@ -33,6 +33,8 @@
             <option value="bebas">Bebas</option>
             <option value="terbatas">Terbatas</option>
             <option value="keras">Keras</option>
+            <option value="narkotika">Narkotika</option>
+            <option value="psikotropika">Psikotropika</option>
         </select>
         <small id="nameHelp" class="form-text text-muted">Mohon pilih input yang diinginkan.</small>
     </div>

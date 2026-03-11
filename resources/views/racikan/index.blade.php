@@ -40,8 +40,11 @@
             'biaya_embalase' => 'Biaya Embalase',
             'deskripsi' => 'Deskripsi',
             'nama_dokter' => 'Dokter',
+            'alamat_dokter' => 'Alamat Dokter',
             'nama_pasien' => 'Pasien',
+            'alamat_pasien' => 'Alamat Pasien',
             'aturan_pakai' => 'Aturan Pakai',
+            'tgl_ambil' => 'Tanggal Pengambilan',
         ] as $column => $label)
                         <th>
                             <a
@@ -65,8 +68,11 @@
                         <td>{{ $d->biaya_embalase }}</td>
                         <td>{{ $d->deskripsi }}</td>
                         <td>{{ $d->nama_dokter }}</td>
+                        <td>{{ $d->alamat_dokter }}</td>
                         <td>{{ $d->nama_pasien }}</td>
+                        <td>{{ $d->alamat_pasien }}</td>
                         <td>{{ $d->aturan_pakai }}</td>
+                        <td>{{ $d->tgl_ambil }}</td>
                         <td>
                             <img height="100px" src="{{ asset('/resep_image/' . $d->bukti_resep) }}" alt="Resep Image" /><br>
                             <a href="{{ url('racikan/uploadImage/' . $d->id) }}" class="btn btn-xs btn-default">Upload</a>

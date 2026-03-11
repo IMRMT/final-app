@@ -158,7 +158,7 @@ class RacikanController extends Controller
     public function create()
     {
         $racikans = Racikan::all();
-        $produks = Produk::whereIn('golongan', ['terbatas', 'keras'])->get();
+        $produks = Produk::whereIn('golongan', ['terbatas', 'keras', 'narkotika', 'psikotropika'])->get();
         return view('racikan.create', ['racikans' => $racikans, 'produks' => $produks]);
     }
 
@@ -171,7 +171,9 @@ class RacikanController extends Controller
             'nama' => 'required',
             'deskripsi' => 'required',
             'nama_dokter' => 'required',
+            'alamat_dokter' => 'required',
             'nama_pasien' => 'required',
+            'alamat_pasien' => 'required',
             'aturan_pakai' => 'required',
             'biaya_embalase' => 'required',
             'produks_id' => 'required|array',
@@ -183,7 +185,9 @@ class RacikanController extends Controller
         $racikan->nama = $request->get('nama');
         $racikan->deskripsi = $request->get('deskripsi');
         $racikan->nama_dokter = $request->get('nama_dokter');
+        $racikan->alamat_dokter = $request->get('alamat_dokter');
         $racikan->nama_pasien = $request->get('nama_pasien');
+        $racikan->alamat_pasien = $request->get('alamat_pasien');
         $racikan->aturan_pakai = $request->get('aturan_pakai');
         $racikan->biaya_embalase = $request->get('biaya_embalase');
         $racikan->save();
@@ -366,7 +370,11 @@ class RacikanController extends Controller
         $racikan->nama = $request->get('nama');
         $racikan->deskripsi = $request->get('deskripsi');
         $racikan->aturan_pakai = $request->get('aturan_pakai');
-        $racikan->biaya_embalase = $request->get('biaya_embalase');
+        $racikan->nama_dokter = $request->get('nama_dokter');
+        $racikan->alamat_dokter = $request->get('alamat_dokter');
+        $racikan->nama_pasien = $request->get('nama_pasien');
+        $racikan->alamat_pasien = $request->get('alamat_pasien');
+        $racikan->tgl_ambil = $request->get('tgl_ambil');
         $racikan->save();
 
         $produks_ids = $request->input('produks_id', []);
@@ -483,5 +491,278 @@ class RacikanController extends Controller
         $racikan->bukti_resep = $filename;
         $racikan->save();
         return redirect()->route('racikans.index')->with('status', 'photo terupload');
+    }
+
+    // untuk obat narkotika
+
+    private function narkotikaQuery()
+    {
+        return DB::table('notajuals_has_racikans')
+            ->join('notajuals', 'notajuals_has_racikans.notajuals_id', '=', 'notajuals.id')
+            ->join('racikans', 'notajuals_has_racikans.racikans_id', '=', 'racikans.id')
+            ->join('racikanproduks', 'racikans.id', '=', 'racikanproduks.racikans_id')
+            ->join('produks', 'racikanproduks.produks_id', '=', 'produks.id')
+            ->join('produkbatches', 'produkbatches.produks_id', '=', 'produks.id')
+            ->join('satuans', 'produkbatches.satuans_id', '=', 'satuans.id')
+            ->join('distributors', 'produkbatches.distributors_id', '=', 'distributors.id')
+            ->leftJoin('terimabatches', 'produkbatches.id', '=', 'terimabatches.produkbatches_id')
+            ->join('users', 'notajuals.pegawai_id', '=', 'users.id')
+
+            ->select(
+                'racikans.id as racikan_id',
+                'produkbatches.id as batch_id',
+                'produks.nama as nama_produk',
+                'satuans.nama as nama_satuan',
+
+                DB::raw('
+                (
+                    produkbatches.stok
+                    + COALESCE((
+                        SELECT SUM(tb.stok)
+                        FROM terimabatches tb
+                        WHERE tb.produkbatches_id = produkbatches.id
+                        AND tb.created_at < DATE_FORMAT(racikans.tgl_ambil,"%Y-%m-01")
+                    ),0)
+                    - COALESCE((
+                        SELECT SUM(nhr.quantity)
+                        FROM notajuals_has_racikans nhr
+                        JOIN racikans r ON nhr.racikans_id = r.id
+                        WHERE r.tgl_ambil < DATE_FORMAT(racikans.tgl_ambil,"%Y-%m-01")
+                    ),0)
+                ) as stok_awalbulan
+            '),
+
+                'distributors.nama as nama_distributor',
+
+                DB::raw('COALESCE(SUM(terimabatches.stok),0) as stok_diterima'),
+                DB::raw('SUM(notajuals_has_racikans.quantity) as stok_keluar'),
+
+                DB::raw('
+                (
+                    (
+                        produkbatches.stok
+                        + COALESCE(SUM(terimabatches.stok),0)
+                        - SUM(notajuals_has_racikans.quantity)
+                    )
+                ) as stok_akhirbulan
+            '),
+
+                'racikans.nama_pasien',
+                'racikans.alamat_pasien',
+                'racikans.nama_dokter',
+                'racikans.alamat_dokter',
+                'racikans.tgl_ambil',
+
+                'users.nama as nama_pegawai'
+            )
+            ->whereIn('produks.golongan', ['narkotika', 'psikotropika'])
+
+            ->groupBy(
+                'racikans.id',
+                'produkbatches.id',
+                'produks.nama',
+                'satuans.nama',
+                'distributors.nama',
+                'racikans.nama_pasien',
+                'racikans.alamat_pasien',
+                'racikans.nama_dokter',
+                'racikans.alamat_dokter',
+                'racikans.tgl_ambil',
+                'users.nama',
+                'produkbatches.stok'
+            );
+    }
+
+    public function daftarNarkotika(Request $request)
+    {
+        $query = $this->narkotikaQuery();
+
+        $search = $request->get('search');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('produks.nama', 'LIKE', "%$search%")
+                    ->orWhere('racikans.nama_pasien', 'LIKE', "%$search%")
+                    ->orWhere('racikans.nama_dokter', 'LIKE', "%$search%")
+                    ->orWhere('users.nama', 'LIKE', "%$search%");
+            });
+        }
+
+        $sortBy = $request->get('sort_by', 'batch_id');
+        $sortOrder = $request->get('sort_order', 'asc');
+
+        switch ($sortBy) {
+            case 'racikan_id':
+                $query->orderBy('racikans.id', $sortOrder);
+                break;
+
+            case 'batch_id':
+                $query->orderBy('produkbatches.id', $sortOrder);
+                break;
+
+            case 'nama_produk':
+                $query->orderBy('produks.nama', $sortOrder);
+                break;
+
+            case 'nama_satuan':
+                $query->orderBy('satuans.nama', $sortOrder);
+                break;
+
+            case 'nama_distributor':
+                $query->orderBy('distributors.nama', $sortOrder);
+                break;
+
+            case 'stok_awalbulan':
+                $query->orderBy('stok_awalbulan', $sortOrder);
+                break;
+
+            case 'stok_diterima':
+                $query->orderBy('stok_diterima', $sortOrder);
+                break;
+
+            case 'stok_keluar':
+                $query->orderBy('stok_keluar', $sortOrder);
+                break;
+
+            case 'stok_akhirbulan':
+                $query->orderBy('stok_akhirbulan', $sortOrder);
+                break;
+
+            case 'nama_pasien':
+                $query->orderBy('racikans.nama_pasien', $sortOrder);
+                break;
+
+            case 'alamat_pasien':
+                $query->orderBy('racikans.alamat_pasien', $sortOrder);
+                break;
+
+            case 'nama_dokter':
+                $query->orderBy('racikans.nama_dokter', $sortOrder);
+                break;
+
+            case 'alamat_dokter':
+                $query->orderBy('racikans.alamat_dokter', $sortOrder);
+                break;
+
+            case 'tgl_ambil':
+                $query->orderBy('racikans.tgl_ambil', $sortOrder);
+                break;
+
+            default:
+                $query->orderBy('produkbatches.id', 'asc');
+        }
+
+        $datas = $query->paginate(10);
+
+        return view('transaksi.daftarNarkotika', [
+            'datas' => $datas,
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder,
+            'search' => $search
+        ]);
+    }
+
+    public function reportNarkotika(Request $request)
+    {
+        $filter = $request->get('filter', 'month');
+
+        $query = $this->narkotikaQuery();
+
+        switch ($filter) {
+            case 'week':
+                $query->whereBetween('racikans.tgl_ambil', [
+                    now()->startOfWeek(),
+                    now()->endOfWeek()
+                ]);
+                break;
+
+            case 'month':
+                $query->whereYear('racikans.tgl_ambil', now()->year)
+                    ->whereMonth('racikans.tgl_ambil', now()->month);
+                break;
+
+            case 'year':
+                $query->whereYear('racikans.tgl_ambil', now()->year);
+                break;
+
+            case 'day':
+            default:
+                $query->whereDate('racikans.tgl_ambil', now());
+        }
+
+        $datas = $query->get();
+
+        $total = $datas->sum('stok_keluar');
+
+        return view('transaksi.reportNarkotika', compact('datas', 'total', 'filter'));
+    }
+
+    public function reportCsvNarkotika(Request $request)
+    {
+        $datas = $this->narkotikaQuery()->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="laporan_narkotika.csv"',
+        ];
+
+        $callback = function () use ($datas) {
+
+            $file = fopen('php://output', 'w');
+
+            // UTF-8 BOM for Excel
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            // Header
+            fputcsv($file, [
+                'Racikan ID',
+                'Batch ID',
+                'Nama Obat',
+                'Satuan',
+                'Stok Awal Bulan',
+                'Distributor',
+                'Jumlah Diterima',
+                'Jumlah Dipakai',
+                'Stok Akhir Bulan',
+                'Nama Pasien',
+                'Alamat Pasien',
+                'Nama Dokter',
+                'Alamat Dokter',
+                'Tanggal Ambil'
+            ], ';');
+
+            foreach ($datas as $d) {
+
+                fputcsv($file, [
+                    $d->racikan_id,
+                    $d->batch_id,
+                    $d->nama_produk,
+                    $d->nama_satuan,
+                    $d->stok_awalbulan,
+                    $d->nama_distributor,
+                    $d->stok_diterima,
+                    $d->stok_keluar,
+                    $d->stok_akhirbulan,
+                    $d->nama_pasien,
+                    $d->alamat_pasien,
+                    $d->nama_dokter,
+                    $d->alamat_dokter,
+                    $d->tgl_ambil
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function printNarkotika($id)
+    {
+        $datas = $this->narkotikaQuery()
+            ->where('racikans.id', $id)
+            ->get();
+
+        return view('transaksi.nnPrint', compact('datas'));
     }
 }

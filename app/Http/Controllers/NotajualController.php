@@ -335,6 +335,7 @@ class NotajualController extends Controller
             ->join('satuans', 'produkbatches.satuans_id', '=', 'satuans.id')
             ->where('produkbatches.status', '=', 'tersedia')
             ->where('produkbatches.stok', '>', 0)
+            ->whereNotIn('produks.golongan', ['narkotika', 'psikotropika'])
             ->where(function ($query) {
                 $query->whereDate('produkbatches.tgl_kadaluarsa', '>', Carbon::now())
                     ->orWhereNull('produkbatches.tgl_kadaluarsa');

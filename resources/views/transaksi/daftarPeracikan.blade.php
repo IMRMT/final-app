@@ -8,7 +8,7 @@
 
     <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">Daftar Nota Penjualan Racikan</h1>
 
-    <a href="{{ route('notajuals.create') }}" class="btn btn-primary mb-3">Create New Nota Penjualan</a>
+    <a href="{{ route('racikan') }}" class="btn btn-primary mb-3">Create New Nota Penjualan</a>
 
     <div class="container">
         <form method="GET" action="{{ route('racikans.notaRacikan') }}" class="mb-3">

@@ -130,6 +130,11 @@ Route::middleware(['auth', IsAdminOrApoteker::class])->group(function () {
     Route::get('produk/batch/{id}', [ProdukController::class, 'batch'])->name('produks.batch');
     Route::get('produk/batch/{id}/print', [ProdukController::class, 'print'])->name('produks.print');
 
+    Route::get('racikan/daftarNarkotika', [RacikanController::class, 'daftarNarkotika'])->name('racikans.daftarNarkotika');
+    Route::get('racikan/report/reportNarkotika', [RacikanController::class, 'reportNarkotika'])->name('racikans.reportNarkotika');
+    Route::get('racikan/report/reportNarkotika/csv', [RacikanController::class, 'reportCsvNarkotika'])->name('racikans.CsvNarkotika');
+    Route::get('racikan/printNarkotika/{id}', [RacikanController::class, 'printNarkotika'])->name('racikans.printNarkotika');
+
     Route::post('/notabelis/cart', [NotabeliController::class, 'addToCart'])->name('notabelis.cart');
     Route::delete('/notabelis/cart/delete/{id}', [NotabeliController::class, 'deleteFromCart'])->name('notabeliscart.delete');
     Route::post('/notabelis/beliProdukBaru', [NotabeliController::class, 'beliProdukBaru'])->name('notabelis.beliProdukBaru');

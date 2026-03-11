@@ -25,6 +25,8 @@
             <option value="bebas" {{ $datas->golongan == 'bebas' ? 'selected' : '' }}>Bebas</option>
             <option value="terbatas" {{ $datas->golongan == 'terbatas' ? 'selected' : '' }}>Terbatas</option>
             <option value="keras" {{ $datas->golongan == 'keras' ? 'selected' : '' }}>Keras</option>
+            <option value="narkotika" {{ $datas->golongan == 'narkotika' ? 'selected' : '' }}>Narkotika</option>
+            <option value="psikotropika" {{ $datas->golongan == 'psikotropika' ? 'selected' : '' }}>Psikotropika</option>
         </select>
         <small id="nameHelp" class="form-text text-muted">Mohon pilih input yang diinginkan.</small>
     </div>

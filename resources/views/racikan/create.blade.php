@@ -33,9 +33,19 @@
             <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
         </div>
         <div class="form-group">
+            <label for="alamat_dokter">Alamat Dokter</label>
+            <textarea name="alamat_dokter" class="form-control"></textarea>
+            <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
+        </div>
+        <div class="form-group">
             <label for="nama_pasien">Nama Pasien</label>
             <input type="text" class="form-control" name="nama_pasien" aria-describedby="nameHelp"
                 placeholder="Masukkan Nama Pasien">
+            <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
+        </div>
+        <div class="form-group">
+            <label for="alamat_pasien">Alamat Pasien</label>
+            <textarea name="alamat_pasien" class="form-control"></textarea>
             <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
         </div>
         <div class="form-group">

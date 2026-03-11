@@ -15,6 +15,28 @@
             <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
         </div>
         <div class="form-group">
+            <label for="nama_dokter">Nama Dokter</label>
+            <input type="text" class="form-control" name="nama_dokter" aria-describedby="nameHelp"
+                placeholder="Masukkan Nama Dokter" value="{{ $datas->nama_dokter }}">
+            <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
+        </div>
+        <div class="form-group">
+            <label for="alamat_dokter">Alamat Dokter</label>
+            <textarea name="alamat_dokter" class="form-control">{{ old('alamat_dokter', $datas->alamat_dokter) }}</textarea>
+            <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
+        </div>
+        <div class="form-group">
+            <label for="nama_pasien">Nama Pasien</label>
+            <input type="text" class="form-control" name="nama_pasien" aria-describedby="nameHelp"
+                placeholder="Masukkan Nama Pasien" value="{{ $datas->nama_pasien }}">
+            <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
+        </div>
+        <div class="form-group">
+            <label for="alamat_pasien">Alamat Pasien</label>
+            <textarea name="alamat_pasien" class="form-control">{{ old('alamat_pasien', $datas->alamat_pasien) }}</textarea>
+            <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
+        </div>
+        <div class="form-group">
             <label for="deskripsi">Deskripsi Racikan</label>
             <textarea name="deskripsi" class="form-control">{{ old('deskripsi', $datas->deskripsi) }}</textarea>
             <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
@@ -29,6 +51,12 @@
             <input type="text" class="form-control" name="biaya_embalase" aria-describedby="nameHelp"
                 placeholder="Masukkan Biaya Racikan" value="{{ $datas->biaya_embalase }}">
             <small id="nameHelp" class="form-text text-muted">Mohon isikan dengan input yang diinginkan.</small>
+        </div>
+        <div class="form-group">
+            <label for="tgl_ambil">Tanggal Ambil</label>
+            <input type="date" class="form-control" name="tgl_ambil" aria-describedby="dateHelp"
+                value="{{ $datas->tgl_ambil }}">
+            <small id="dateHelp" class="form-text text-muted">Pilih tanggal ambil racikan</small>
         </div>
 
         <h4>Produk Komposisi</h4>
